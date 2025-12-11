@@ -1,0 +1,18 @@
+{
+  "name": "puter-ai-proxy",
+  "version": "1.0.0",
+  "description": "OpenAI-compatible proxy for Puter. com AI models - Use Claude, GPT-4, Gemini in Cursor/Roo Code",
+  "main":  "src/index.js",
+  "scripts":  {
+    "start": "node src/index.js",
+    "dev": "node --watch src/index.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "ws": "^8.13.0",
+    "node-fetch": "^2.7.0",
+    "uuid": "^9.0.0"
+  },
+  "keywords": ["puter", "openai", "proxy", "cursor", "ai", "claude", "gpt"],
+  "license": "MIT"
+}

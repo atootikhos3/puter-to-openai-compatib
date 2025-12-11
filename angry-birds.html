@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Angry Birds Clone</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            background-color: #87CEEB; /* Sky Blue */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            font-family: Arial, sans-serif;
+        }
+        canvas {
+            border: 2px solid #333;
+            background-color: #f0f0f0;
+        }
+        h1 {
+            position: absolute;
+            top: 20px;
+            color: white;
+            text-shadow: 2px 2px 4px #000;
+        }
+    </style>
+</head>
+<body>
+    <h1>Drag and Release to Fire!</h1>
+    <canvas id="gameCanvas" width="800" height="600"></canvas>
+
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+
+        // Game objects
+        let bird = {
+            x: 100,
+            y: 450,
+            radius: 15,
+            velocityX: 0,
+            velocityY: 0,
+            isFlying: false,
+            isDragging: false,
+            color: 'red'
+        };
+
+        const sling = {
+            x: 100,
+            y: 450
+        };
+
+        let targets = [
+            { x: 600, y: 550, width: 30, height: 50, color: 'green' },
+            { x: 650, y: 550, width: 30, height: 50, color: 'green' },
+            { x: 625, y: 500, width: 80, height: 20, color: 'brown' },
+            { x: 625, y: 450, width: 30, height: 50, color: 'green' }
+        ];
+
+        let isMouseDown = false;
+        let mouse = { x: 0, y: 0 };
+
+        // --- Event Listeners ---
+        canvas.addEventListener('mousedown', (e) => {
+            const rect = canvas.getBoundingClientRect();
+            mouse.x = e.clientX - rect.left;
+            mouse.y = e.clientY - rect.top;
+            
+            const dist = Math.sqrt((mouse.x - bird.x) ** 2 + (mouse.y - bird.y) ** 2);
+            if (dist < bird.radius && !bird.isFlying) {
+                isMouseDown = true;
+                bird.isDragging = true;
+            }
+        });
+
+        canvas.addEventListener('mousemove', (e) => {
+            if (isMouseDown && bird.isDragging) {
+                const rect = canvas.getBoundingClientRect();
+                mouse.x = e.clientX - rect.left;
+                mouse.y = e.clientY - rect.top;
+                
+                const distance = Math.sqrt((mouse.x - sling.x)**2 + (mouse.y - sling.y)**2);
+                const maxDrag = 100;
+                
+                if (distance > maxDrag) {
+                    const angle = Math.atan2(mouse.y - sling.y, mouse.x - sling.x);
+                    bird.x = sling.x + Math.cos(angle) * maxDrag;
+                    bird.y = sling.y + Math.sin(angle) * maxDrag;
+                } else {
+                    bird.x = mouse.x;
+                    bird.y = mouse.y;
+                }
+            }
+        });
+
+        canvas.addEventListener('mouseup', () => {
+            if (isMouseDown && bird.isDragging) {
+                isMouseDown = false;
+                bird.isDragging = false;
+                bird.isFlying = true;
+                // Launch the bird
+                bird.velocityX = (sling.x - bird.x) * 0.15;
+                bird.velocityY = (sling.y - bird.y) * 0.15;
+            }
+        });
+        
+        // --- Game Loop ---
+        function gameLoop() {
+            update();
+            draw();
+            requestAnimationFrame(gameLoop);
+        }
+
+        function update() {
+            if (bird.isFlying) {
+                // Apply gravity
+                bird.velocityY += 0.2;
+                bird.x += bird.velocityX;
+                bird.y += bird.velocityY;
+
+                // Ground collision
+                if (bird.y + bird.radius > canvas.height) {
+                    resetBird();
+                }
+                
+                // Target collision
+                targets.forEach((target, index) => {
+                    if (
+                        bird.x > target.x &&
+                        bird.x < target.x + target.width &&
+                        bird.y > target.y &&
+                        bird.y < target.y + target.height
+                    ) {
+                        // Remove target on hit
+                        targets.splice(index, 1);
+                    }
+                });
+            }
+
+            // Check for win condition
+            if (targets.length === 0) {
+                alert("You Win!");
+                resetGame();
+            }
+        }
+        
+        function draw() {
+            // Clear canvas
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // Draw Ground
+            ctx.fillStyle = '#654321'; // Brown
+            ctx.fillRect(0, canvas.height - 20, canvas.width, 20);
+
+            // Draw sling
+            ctx.strokeStyle = '#333';
+            ctx.lineWidth = 5;
+            ctx.beginPath();
+            ctx.moveTo(sling.x - 10, sling.y);
+            ctx.lineTo(bird.x, bird.y);
+            ctx.lineTo(sling.x + 10, sling.y);
+            ctx.stroke();
+
+            // Draw bird
+            ctx.fillStyle = bird.color;
+            ctx.beginPath();
+            ctx.arc(bird.x, bird.y, bird.radius, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Draw targets
+            targets.forEach(target => {
+                ctx.fillStyle = target.color;
+                ctx.fillRect(target.x, target.y, target.width, target.height);
+            });
+        }
+
+        function resetBird() {
+            bird.x = sling.x;
+            bird.y = sling.y;
+            bird.velocityX = 0;
+            bird.velocityY = 0;
+            bird.isFlying = false;
+        }
+
+        function resetGame() {
+            resetBird();
+            targets = [
+                { x: 600, y: 550, width: 30, height: 50, color: 'green' },
+                { x: 650, y: 550, width: 30, height: 50, color: 'green' },
+                { x: 625, y: 500, width: 80, height: 20, color: 'brown' },
+                { x: 625, y: 450, width: 30, height: 50, color: 'green' }
+            ];
+        }
+
+        // Start the game
+        gameLoop();
+    </script>
+</body>
+</html>
