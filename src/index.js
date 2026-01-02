@@ -10,6 +10,12 @@ const app = express();
 // Increase the limit to 500mb to handle extremely large conversation history (effectively no limit)
 app.use(express.json({ limit: '500mb' }));
 
+// Request logging middleware
+app.use((req, res, next) => {
+    console.log(`${req.method} ${req.url}`);
+    next();
+});
+
 const PORT = process.env.PORT || 3000;
 let authManager = null;
 let puterClient = null;
@@ -71,7 +77,13 @@ app.get('/v1/models', (req, res) => {
 });
 
 // POST /v1/chat/completions - Main chat endpoint
-app.post('/v1/chat/completions', async (req, res) => {
+app.post('/v1/chat/completions', handleChatCompletion);
+
+// POST /v1 - Handle misconfigured clients sending chat requests to /v1
+app.post('/v1', handleChatCompletion);
+
+// Main chat logic extraction to be reused
+async function handleChatCompletion(req, res) {
     try {
         const { model, messages, stream, temperature, max_tokens, tools } = req.body;
         const requestId = `chatcmpl-${uuidv4()}`;
@@ -152,7 +164,7 @@ app.post('/v1/chat/completions', async (req, res) => {
             }
         });
     }
-});
+};
 
 // Handle credits exhausted - refresh session
 async function handleCreditsExhausted(error) {

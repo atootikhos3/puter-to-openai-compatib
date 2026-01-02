@@ -16,8 +16,8 @@ const MODELS = [
     
     // Gemini models
     { id: 'gemini-3-pro-preview', driver: 'gemini', model: 'gemini-3-pro-preview', provider: 'google' },
-    { id: 'claude-opus-4-5', driver: 'gemini', model: 'claude-opus-4-5', provider: 'google' },
-    { id: 'gpt-5.1-codex-max', driver: 'gemini', model:  'gpt-5.1-codex-max', provider: 'google' },
+    { id: 'anthropic/claude-opus-4.5', driver: 'gemini', model: 'claude-opus-4-5', provider: 'google' },
+    { id: 'gpt-5.1-codex-max', driver: 'gemini', model:  'gpt-5.1-codex-max', provider: 'mistral' },
     { id: 'gemini-2.5-pro', driver:  'gemini', model: 'gemini-2.5-pro', provider:  'google' },
     { id:  'gemini-2.5-flash', driver: 'gemini', model: 'gemini-2.5-flash', provider: 'google' },
     
